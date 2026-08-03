@@ -546,7 +546,7 @@
     <div class="pgt">⭐ 고객 후기</div>
     <div class="pgb">
       <div id="rvCount" style="font-size:14px;color:var(--muted);margin-bottom:11px;"></div>
-      <div id="rvList"><div style="text-align:center;color:var(--muted);font-size:14.5px;padding:14px 0;">후기를 불러오는 중…</div></div>
+      <div id="rvList"></div>
       <div id="rvMoreWrap" style="display:none;text-align:center;margin-top:6px;">
         <button type="button" id="rvMore" style="background:#fff;border:1.5px solid var(--line);border-radius:11px;
           padding:12px 22px;font-family:inherit;font-size:15px;font-weight:800;color:var(--navy);cursor:pointer;">후기 더 보기</button>
@@ -1144,18 +1144,26 @@
   }
   function rvLoad(){
     if(rvLoaded)return; rvLoaded=true;
-    function fallback(){ rvData=rvSort(RV_SEED); rvShown=Math.min(3,rvData.length); rvRender(); }
-    if(!CONFIG.ENDPOINT){ fallback(); return; }
-    fetchTimeout(CONFIG.ENDPOINT+"?tab=review",{method:"GET"},8000)
+
+    /* ① 먼저 심어둔 후기를 즉시 보여준다 (기다림 없음) */
+    rvData  = rvSort(RV_SEED);
+    rvShown = Math.min(3, rvData.length);
+    rvRender();
+
+    /* ② 뒤에서 최신 후기를 받아 조용히 갈아 끼운다 */
+    if(!CONFIG.ENDPOINT) return;
+    fetchTimeout(CONFIG.ENDPOINT+"?tab=review",{method:"GET"},9000)
       .then(function(r){ return r.json(); })
       .then(function(j){
         var list=(j&&(j.reviews||j.data||j.list))||[];
         list=list.filter(function(x){ return x&&x.text&&String(x.text).trim(); });
-        rvData = rvSort(list.length?list:RV_SEED);
-        rvShown = Math.min(3, rvData.length);
+        if(!list.length) return;                       // 못 받으면 심어둔 것 그대로 둔다
+        var keep = rvShown;                            // 손님이 펼쳐 본 만큼은 유지
+        rvData  = rvSort(list);
+        rvShown = Math.min(Math.max(keep,3), rvData.length);
         rvRender();
       })
-      .catch(fallback);
+      .catch(function(){ /* 실패해도 화면은 이미 채워져 있음 */ });
   }
   var rvm=document.getElementById("rvMore");
   if(rvm)rvm.addEventListener("click",function(){ rvShown=Math.min(rvShown+3,rvData.length); rvRender(); });
@@ -1246,6 +1254,8 @@
     var q=new URLSearchParams(location.search);
     if(q.get("go")==="form"||q.get("mode")) go("form");
   })();
+  /* 후기 미리 불러오기 — 손님이 다른 화면 보는 동안 준비해 둔다 */
+  setTimeout(function(){ try{ rvLoad(); }catch(e){} }, 400);
   document.querySelectorAll("#mode button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===state.mode);});addrCard("from");addrCard("to");renderRooms();renderExtra();applyMode();updateCounter();
 </script>
 </body>

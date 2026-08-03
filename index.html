@@ -55,12 +55,25 @@
   /* ══ v23 읽을거리 페이지 ══ */
   .page{display:none;}
   .page.on{display:block;}
+  /* 회사소개 목차 띠 */
+  .chipnav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;}
+  .chipnav::-webkit-scrollbar{display:none;}
+  .chipnav button{flex:0 0 auto;background:#fff;border:1.5px solid var(--line);border-radius:999px;
+    padding:9px 14px;font-family:inherit;font-size:14.5px;font-weight:800;color:var(--navy);cursor:pointer;}
+  .chipnav button.on{background:var(--navy);border-color:var(--navy);color:#fff;}
   /* 카드뉴스 — 한 화면에 한 주제, 스크롤하면 다음 */
   .snap{height:var(--snapH,70vh);overflow-y:auto;scroll-snap-type:y mandatory;
     -webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior:contain;}
   .snap::-webkit-scrollbar{display:none;}
   .slide{min-height:var(--snapH,70vh);scroll-snap-align:start;scroll-snap-stop:always;
     display:flex;flex-direction:column;justify-content:center;padding:10px 2px 6px;box-sizing:border-box;}
+  @media (max-height:700px){
+    .slide .ph2{font-size:24px;} .slide .psub{font-size:16px;}
+    .slide .goldcard,.slide .qcard{padding:14px 13px;}
+    .slide .feat .item{padding:12px 0;}
+    .slide .down{margin-top:10px;font-size:13px;}
+  }
   .slide.top{justify-content:flex-start;padding-top:6px;}
   .down{text-align:center;color:#B8860B;font-size:14px;font-weight:800;margin-top:14px;
     animation:bob 1.6s ease-in-out infinite;}
@@ -233,6 +246,8 @@
   .junk .jin::placeholder{color:#B6BFCC;font-size:14.5px;}
   #gather{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
   #gather button{min-width:0;padding:14px 2px;font-size:15.5px;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #vWay{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
+  #vWay button{min-width:0;padding:14px 6px;font-size:15.5px;}
   #vSlot{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   #vSlot button{min-width:0;padding:15px 6px;font-size:16px;}
   .timesel{display:flex;gap:6px;margin-top:5px;}
@@ -387,16 +402,24 @@
     </div>
 
     <div id="visitWrap">
-      <div class="lbl" id="visitLbl">🕘 방문견적 일시 <span class="sm">(통화에서 정하신 일시를 입력해주세요)</span></div>
-      <div class="guide teal" id="visitHint" style="display:none;font-size:15px;line-height:1.6;padding:11px 12px;margin-bottom:9px;">낮에는 <b>현장 작업 중</b>이라 방문견적은 <b>통상 16시 이후</b>부터 가능합니다.<br>구체적인 시간은 <b>다른 일정이 있을 수 있어 조율이 필요</b>합니다. 편하신 시간대만 골라주셔도 됩니다.</div>
+      <div class="lbl">🕘 방문견적 일시</div>
+
+      <div class="seg" id="vWay">
+        <button data-v="확정">통화에서 정했어요</button><button data-v="희망">희망 시간대만 고를게요</button>
+      </div>
+
+      <div class="guide teal" id="visitHint" style="display:none;font-size:15px;line-height:1.6;padding:11px 12px;margin:9px 0;">낮에는 <b>현장 작업 중</b>이라 방문견적은 <b>통상 16시 이후</b>부터 가능합니다.<br>구체적인 시간은 <b>다른 일정이 있을 수 있어 조율이 필요</b>합니다. 편하신 시간대만 골라주셔도 됩니다.</div>
+
+      <div class="lbl" id="visitDateLbl2" style="font-size:14.5px;">방문 날짜</div>
       <button type="button" class="dtrig" id="visitDateBtn"><span id="visitDateLbl" class="dph">날짜 선택</span><span class="dcal">📅</span></button><input type="hidden" id="visitDate">
+
       <div id="slotWrap" style="display:none;">
         <div class="lbl" style="font-size:14.5px;">편하신 시간대가 있으실까요?</div>
         <div class="seg" id="vSlot">
           <button data-v="16~18시">16~18시</button><button data-v="18~20시">18~20시</button><button data-v="주말이 편해요">주말이 편해요</button><button data-v="통화 후 조정">통화 후 조정</button>
         </div>
       </div>
-      <div id="timeWrap"><div class="lbl" id="timeLbl" style="font-size:14.5px;">시간</div><div class="timesel"><select id="vHour"></select><select id="vMin"></select></div></div>
+      <div id="timeWrap"><div class="lbl" id="timeLbl" style="font-size:14.5px;">방문 시각 <span class="sm">(통화에서 정하신 시각)</span></div><div class="timesel"><select id="vHour"></select><select id="vMin"></select></div></div>
     </div>
 
     <div class="lbl">연락처 <span class="req">*</span></div><input id="phone" inputmode="numeric" value="010-" placeholder="010-0000-0000"><div id="phoneEcho" style="margin-top:6px;font-size:15px;font-weight:700;line-height:1.4;"></div>
@@ -456,7 +479,11 @@
 <div id="pageView" style="display:none;">
   <button type="button" class="backbtn" data-go="home">‹ 처음으로</button>
 
-  <div class="page snap" id="p-company">
+  <div class="page" id="p-company">
+    <div class="chipnav" id="cnav">
+      <button type="button" data-s="0">추가금</button><button type="button" data-s="2">연혁·실력</button><button type="button" data-s="3">차량·보험</button><button type="button" data-s="4">이사는</button><button type="button" data-s="5">협력팀</button><button type="button" data-s="6">가격·품질</button><button type="button" data-s="7">권역</button><button type="button" data-s="8">회사정보</button>
+    </div>
+    <div class="snap" id="csnap">
 
     <div class="slide">
       <div class="kicker">이사 전에 꼭 확인하세요</div>
@@ -489,7 +516,7 @@
         <div class="stat gold"><div class="n">9<span class="u">년</span></div><div class="l">입주청소 무료 서비스</div></div>
         <div class="stat gold"><div class="n">0<span class="u">원</span></div><div class="l">30만~50만 원 상당</div></div>
       </div>
-      <div class="down">청소까지 공짜인 이유는?<span class="arw">↓</span></div>
+      <div class="down">차는 빌린 차 아닌가요?<span class="arw">↓</span></div>
     </div>
 
     <div class="slide">
@@ -506,7 +533,74 @@
           <div class="tt">견적한 그대로, <span class="hi">확정가</span></div>
           <div class="dd">견적 그대로 작업. 당일 말 안 바뀝니다.</div></div></div>
       </div>
-      <div class="down"><span class="arw">↓</span></div>
+      <div class="down">그럼 이사는 어떻게 할까요?<span class="arw">↓</span></div>
+    </div>
+
+    <div class="slide">
+      <div class="kicker">이사는 이렇게 합니다</div>
+      <div class="ph2">집이 상하지 않게,<br><em>짐이 상하지 않게</em></div>
+
+      <div class="feat" style="margin-top:16px;">
+        <div class="item"><div class="ic">🛡️</div><div>
+          <div class="tt">바닥 <span class="hi">보양</span></div>
+          <div class="dd">짐 나르기 전에 바닥부터 덮습니다. 새집 바닥에 흠 안 냅니다.</div></div></div>
+        <div class="item"><div class="ic">📦</div><div>
+          <div class="tt">전용 <span class="hi">포장재</span></div>
+          <div class="dd">품목에 맞는 전용 포장재를 씁니다. 아무 데나 담지 않습니다.</div></div></div>
+        <div class="item"><div class="ic">🧻</div><div>
+          <div class="tt">비닐 <span class="hi">속지</span></div>
+          <div class="dd">짐이 직접 닿지 않게 속지를 넣고 쌉니다.</div></div></div>
+        <div class="item"><div class="ic">👣</div><div>
+          <div class="tt">도착지 <span class="hi">덧신</span></div>
+          <div class="dd">새집에서는 덧신을 신고 들어갑니다.</div></div></div>
+        <div class="item"><div class="ic">🧊</div><div>
+          <div class="tt">냉장고 <span class="hi">선반 닦기</span></div>
+          <div class="dd">손으로 닦아드립니다. <b>스팀은 쓰지 않습니다</b> — 열에 약한 플라스틱과 찬 유리가 상할 수 있어서입니다.</div></div></div>
+      </div>
+
+      <div class="down">이사만 하고 끝일까요?<span class="arw">↓</span></div>
+    </div>
+
+    <div class="slide">
+      <div class="kicker">이사만 하고 끝이 아닙니다</div>
+      <div class="ph2">붙어 있는<br><em>협력팀이 있습니다</em></div>
+
+      <div class="feat" style="margin-top:16px;">
+        <div class="item"><div class="ic">❄️</div><div>
+          <div class="tt">에어컨 <span class="hi">이전설치</span></div>
+          <div class="dd">떼고 옮기고 다시 다는 것까지 한 번에.</div></div></div>
+        <div class="item"><div class="ic">🫧</div><div>
+          <div class="tt">에어컨 · 세탁기 <span class="hi">청소</span></div>
+          <div class="dd">이사 나가는 날 분해 청소. 새집에서 깨끗하게 씁니다.</div></div></div>
+        <div class="item"><div class="ic">🧹</div><div>
+          <div class="tt">입주 <span class="hi">청소</span></div>
+          <div class="dd">이사 고객은 서비스로 해드립니다.</div></div></div>
+        <div class="item"><div class="ic">📺</div><div>
+          <div class="tt">벽걸이 TV <span class="hi">설치</span></div>
+          <div class="dd">전용 팀이 벽 상태 보고 답니다.</div></div></div>
+      </div>
+
+      <div class="down">서비스센터보다 뭐가 나을까요?<span class="arw">↓</span></div>
+    </div>
+
+    <div class="slide">
+      <div class="kicker">왜 협력팀을 두었나</div>
+      <div class="ph2">가격은 <span class="c">착하게</span>,<br>서비스는 <em>똑같이</em></div>
+
+      <div class="goldcard" style="margin-top:16px;padding:16px 15px;">
+        <div class="why" style="border-top:none;padding-top:0;font-size:16px;line-height:1.6;">
+          서비스센터는 부르는 값 그대로입니다.<br>
+          <b>오래 같이 일한 팀이라<br>가격을 착하게 맞춥니다.</b><br>
+          그래도 <b>품질은 똑같습니다.</b>
+        </div>
+      </div>
+
+      <div class="qcard" style="margin-top:10px;padding:15px 14px;">
+        <div class="qk" style="font-size:14.5px;">그리고 더 큰 것</div>
+        <div class="qbody" style="font-size:16px;margin-top:8px;line-height:1.5;">이사 날 <b>한 번에</b> 끝납니다.<br>따로 날 잡고 기다리실 일이 <b>없습니다.</b></div>
+      </div>
+
+      <div class="down">그럼 어떤 이사를 할까요?<span class="arw">↓</span></div>
     </div>
 
     <div class="slide">
@@ -517,13 +611,13 @@
         <span class="area">원룸·소형</span><span class="area">사무실</span><span class="area">장거리</span>
       </div>
       <div class="kicker" style="margin-top:26px;">서비스 권역</div>
-      <div class="psub" style="font-size:16px;margin-top:8px;">아래 지역이 <b>출발지 또는 도착지</b>면 이사해 드립니다.<br><b>타지역에서 대전·세종으로 오시는 이사도 합니다.</b></div>
+      <div class="psub" style="font-size:16px;margin-top:8px;"><b>타지역에서 아래 지역으로 이사 오시는 것도 가능합니다.</b><br>아래 지역이 <b>출발지 또는 도착지</b>면 이사해 드립니다.</div>
       <div class="areas">
         <span class="area">대전</span><span class="area">세종</span><span class="area">계룡</span><span class="area">공주</span>
         <span class="area">옥천</span><span class="area">금산</span><span class="area">논산</span><span class="area">부여</span>
         <span class="area">영동</span><span class="area">청주</span>
       </div>
-      <div class="down"><span class="arw">↓</span></div>
+      <div class="down">저희는 이런 회사입니다<span class="arw">↓</span></div>
     </div>
 
     <div class="slide top">
@@ -552,6 +646,7 @@
           padding:12px 22px;font-family:inherit;font-size:15px;font-weight:800;color:var(--navy);cursor:pointer;">후기 더 보기</button>
       </div>
     </div>
+  </div>
   </div>
 
   <div class="page snap" id="p-free">
@@ -595,7 +690,7 @@
           <b>그 돈이 그대로<br>고객님 새집 청소로 갑니다.</b>
         </div>
       </div>
-      <div class="down"><span class="arw">↓</span></div>
+      <div class="down">그럼 대충 하는 거 아닌가요?<span class="arw">↓</span></div>
     </div>
 
     <div class="slide">
@@ -698,7 +793,7 @@
   var ROOM_HINT={"안방":"붙박이장·드레스룸 안까지","거실베란다":"베란다 짐 꼭","주방베란다":"김치냉장고·세탁기","바닥짐":"포장 안 된 바닥 잡물","주방":"씽크대 상·하부장 안도","씽크대(상·하부장)":"문 열어 안쪽","옥상·마당":"단독·빌라만"};
   var uid=0; function nid(){return ++uid;}
   function toMD2(d){if(!d)return '';var p=d.split('-');return p.length===3?(Number(p[1])+'/'+Number(p[2])):d;}
-  var state={mode:"비대면",gather:"",gatherDetail:"",referName:"",referPhone:"",mkind:"",vacant:"",vSlot:"",from:{si:"",gu:"",detail:"",fl:"",work:[]},to:{si:"",gu:"",detail:"",fl:"",py:"",work:[]},builtin:"",rooms:BASE_ROOMS.map(function(n){return {id:nid(),name:n,files:[]};})};
+  var state={mode:"비대면",gather:"",gatherDetail:"",referName:"",referPhone:"",mkind:"",vacant:"",vSlot:"",vWay:"확정",from:{si:"",gu:"",detail:"",fl:"",work:[]},to:{si:"",gu:"",detail:"",fl:"",py:"",work:[]},builtin:"",rooms:BASE_ROOMS.map(function(n){return {id:nid(),name:n,files:[]};})};
 
   function fillTime(hid,mid,h1,h2){var h=document.getElementById(hid),m=document.getElementById(mid);h.innerHTML='<option value="">-시-</option>';for(var i=h1;i<=h2;i++){var v=(i<10?"0":"")+i;h.innerHTML+='<option value="'+v+'">'+v+'시</option>';}m.innerHTML='<option value="">-분-</option>';["00","10","20","30","40","50"].forEach(function(x){m.innerHTML+='<option value="'+x+'">'+x+'분</option>';});}
   fillTime("vHour","vMin",7,21);   // 통화 고객: 통화에서 정한 시간이면 오전도 가능
@@ -791,20 +886,45 @@
     if(gd)gd.addEventListener("input",syncRefer);
     if(gd2)gd2.addEventListener("input",syncRefer);}
   document.querySelectorAll("#gather button").forEach(function(b){b.addEventListener("click",function(){var v=b.getAttribute("data-v");state.gather=(state.gather===v?"":v);state.gatherDetail="";document.querySelectorAll("#gather button").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-v")===state.gather);});gatherSub();});});
-  var HIDE_TIME=false;   // ?from= 유입이면 시·분을 아예 묻지 않는다
+  /* 방문견적 일시 — 두 갈래
+     확정 : 통화에서 정한 시각을 그대로 입력 (7~21시, 시·분)
+     희망 : 고객이 편한 시간대만 고르고 대표와 조율 (16~21시 기준 안내) */
+  function applyVWay(){
+    var 확정 = (state.vWay!=="희망");
+    var sw=document.getElementById("slotWrap"), tw=document.getElementById("timeWrap");
+    var hint=document.getElementById("visitHint"), dl=document.getElementById("visitDateLbl2");
+    if(sw) sw.style.display = 확정 ? "none" : "";
+    if(hint) hint.style.display = 확정 ? "none" : "";
+    if(dl) dl.textContent = 확정 ? "방문 날짜" : "희망 날짜";
+    if(확정){
+      fillTime("vHour","vMin",7,21);
+      state.vSlot="";
+      document.querySelectorAll("#vSlot button").forEach(function(b){b.classList.remove("on");});
+      if(tw) tw.style.display="";
+    }else{
+      fillTime("vHour","vMin",16,21);
+      var h=document.getElementById("vHour"),m=document.getElementById("vMin");
+      if(h)h.value=""; if(m)m.value="";
+      if(tw) tw.style.display="none";
+    }
+    updateCounter();
+  }
+  var HIDE_TIME=false;   // (구) ?from= 유입 처리 — applyVWay 로 대체됨
   function syncTimeVis(){
     var tw=document.getElementById("timeWrap");
     if(!tw)return;
-    if(HIDE_TIME){ tw.style.display="none"; return; }
-    tw.style.display=(state.vSlot==="통화 후 조정")?"none":"";
+    if(state.vWay!=="희망"){ tw.style.display=""; return; }
+    tw.style.display="none";
     if(state.vSlot==="통화 후 조정"){ var h=document.getElementById("vHour"),m=document.getElementById("vMin"); if(h)h.value=""; if(m)m.value=""; }
   }
-  ["vSlot"].forEach(function(gid){
+  ["vWay","vSlot"].forEach(function(gid){
     document.querySelectorAll("#"+gid+" button").forEach(function(b){
       b.addEventListener("click",function(){
-        var v=b.getAttribute("data-v"); state[gid]=(state[gid]===v?"":v);
+        var v=b.getAttribute("data-v");
+        state[gid] = (gid==="vWay") ? v : (state[gid]===v?"":v);
         document.querySelectorAll("#"+gid+" button").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-v")===state[gid]);});
         if(gid==="vSlot") syncTimeVis();
+        if(gid==="vWay") applyVWay();
       });
     });
   });
@@ -936,6 +1056,7 @@
       유입경로:state.gather+(state.gatherDetail?"("+state.gatherDetail+")":""),
       소개자성함:(state.gather==="지인소개"?state.referName:""),
       소개자연락처:(state.gather==="지인소개"?full11(state.referPhone):""),
+      방문일시방식:(state.vWay==="희망"?"희망(조율필요)":"통화확정"),
       견적희망일:vd||"", 견적희망시간대:state.vSlot||"", 견적희망시각:(vh&&vm)?(vh+":"+vm):"",
       연락처:document.getElementById("phone").value,
       이사종류:state.mkind,
@@ -1011,11 +1132,34 @@
   });
   document.getElementById("mClose").addEventListener("click",function(){document.getElementById("modal").classList.remove("show");});
 
+  /* ══════════ 회사소개 목차 띠 ══════════ */
+  function slidesOf(){ var s=document.getElementById("csnap"); return s?s.querySelectorAll(".slide"):[]; }
+  function markChip(){
+    var sc=document.getElementById("csnap"); if(!sc)return;
+    var sl=slidesOf(); if(!sl.length)return;
+    var h=sl[0].offsetHeight||1;
+    var i=Math.round(sc.scrollTop/h);
+    var btns=document.querySelectorAll("#cnav button"), best=null;
+    btns.forEach(function(b){ var n=Number(b.getAttribute("data-s")); if(n<=i&&(!best||n>Number(best.getAttribute("data-s")))) best=b; });
+    btns.forEach(function(b){ b.classList.toggle("on", b===best); });
+    if(best&&best.scrollIntoView) try{ best.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"}); }catch(e){}
+  }
+  document.querySelectorAll("#cnav button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var sc=document.getElementById("csnap"), sl=slidesOf();
+      var n=Number(b.getAttribute("data-s"));
+      if(sc&&sl[n]) sc.scrollTo({top:sl[n].offsetTop-sl[0].offsetTop,behavior:"smooth"});
+      document.querySelectorAll("#cnav button").forEach(function(x){x.classList.toggle("on",x===b);});
+    });
+  });
+  (function(){ var sc=document.getElementById("csnap"); if(!sc)return;
+    var t=null; sc.addEventListener("scroll",function(){ clearTimeout(t); t=setTimeout(markChip,120); }); })();
+
   /* ══════════ v23 카드뉴스 높이 실측 ══════════ */
   function sizeSnap(){
     var fb=document.querySelector(".fixbar");
     var fbH=fb?fb.offsetHeight:0;
-    var el=document.querySelector(".page.snap.on");
+    var el=document.querySelector(".page.on .snap")||document.querySelector(".page.snap.on");
     var top=el?el.getBoundingClientRect().top:150;
     var h=window.innerHeight-top-fbH-10;
     if(h<380)h=380;
@@ -1032,9 +1176,12 @@
     if(v==="form"){ form.style.display=""; }
     else if(v==="home"){ home.style.display=""; }
     else { pg.style.display=""; var t=document.getElementById("p-"+v);
-           if(t){ t.classList.add("on"); if(t.classList.contains("snap")) t.scrollTop=0; }
+           if(t){ t.classList.add("on");
+                  var sc=t.classList.contains("snap")?t:t.querySelector(".snap");
+                  if(sc) sc.scrollTop=0; }
            if(v==="review")rvLoad();
-           if(t&&t.classList.contains("snap")){ sizeSnap(); setTimeout(sizeSnap,60); } }
+           if(t&&(t.classList.contains("snap")||t.querySelector(".snap"))){ sizeSnap(); setTimeout(sizeSnap,60); }
+           if(v==="company") setTimeout(markChip,80); }
     window.scrollTo(0,0);
   }
   document.addEventListener("click",function(e){
@@ -1220,15 +1367,13 @@
       document.querySelectorAll("#gather button").forEach(function(b){ if(b.getAttribute("data-v")==="기타") b.classList.add("on"); });
       gatherSub(); }
     // 통화를 거치지 않은 고객이므로 방문 가능 시간(16시 이후)만 고르게 한다
-    fillTime("vHour","vMin",16,21);
-    var sw=document.getElementById("slotWrap"); if(sw) sw.style.display="";
-    HIDE_TIME=true; var tw0=document.getElementById("timeWrap"); if(tw0) tw0.style.display="none";  // 시·분은 조율 대상이므로 감춤
+    state.vWay="희망";
+    document.querySelectorAll("#vWay button").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-v")==="희망");});
+    applyVWay();
     // 출처가 와도 질문은 그대로 보여준다 (고객이 직접 바꿀 수 있게 — 지인소개 등)
     gatherSub();
     // 통화 전 유입(숨고 등)이면 안내 문구를 바꾼다
-    var lbl=document.getElementById("visitLbl"), hint=document.getElementById("visitHint");
-    if(lbl) lbl.innerHTML='🕘 방문견적 희망일시 <span class="sm">(편하신 날짜와 시간대를 골라주세요)</span>';
-    if(hint) hint.style.display="";
+
   })();
 
   /* ── 주소 뒤 ?mode= 로 견적 방식을 정해서 보낼 수 있다 ──
@@ -1256,6 +1401,8 @@
   })();
   /* 후기 미리 불러오기 — 손님이 다른 화면 보는 동안 준비해 둔다 */
   setTimeout(function(){ try{ rvLoad(); }catch(e){} }, 400);
+  document.querySelectorAll("#vWay button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===state.vWay);});
+  try{ applyVWay(); }catch(e){}
   document.querySelectorAll("#mode button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===state.mode);});addrCard("from");addrCard("to");renderRooms();renderExtra();applyMode();updateCounter();
 </script>
 </body>

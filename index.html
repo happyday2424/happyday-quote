@@ -207,7 +207,8 @@
   .rvbox .dt.src.nv{background:#E3F5E6;color:#15803D;}
   .rvbox .dt.src.kk{background:#FEF6D9;color:#8A6A12;}
   .rvbox .dt.src.dr{background:var(--tealBg);color:#0F766E;}
-  .rvbox .st{color:#E3B34A;font-size:15px;letter-spacing:2px;}
+  .rvbox .st{color:#E3B34A;font-size:16px;letter-spacing:2px;display:flex;align-items:center;gap:7px;}
+  .rvbox .st .stnum{color:var(--navy);font-size:16.5px;font-weight:900;letter-spacing:0;}
   .rvbox .tx{font-size:15px;line-height:1.7;margin-top:6px;
     display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;}
   .rvbox.open .tx{-webkit-line-clamp:unset;overflow:visible;}
@@ -393,7 +394,7 @@
     해피데이익스프레스 · 대표 박종률<br>
     사업자등록번호 305-30-98954 · 화물자동차 운송사업 허가(대전 동구청)<br>
     대전광역시 서구 복수동로74번길 30, 2층 202호<br>
-    <span style="color:#B6C0CC;">v23 · 0805-1010</span>
+    <span style="color:#B6C0CC;">v23 · 0805-2230</span>
   </div>
 </div>
 
@@ -1294,8 +1295,11 @@
     });
   }
   function rvCard(r){
-    var s=""; var n=Math.max(1,Math.min(5,Number(r.star)||5));
-    for(var i=0;i<n;i++)s+="★";
+    var raw=Number(r.star); if(!raw||isNaN(raw)) raw=5;
+    if(raw<1)raw=1; if(raw>5)raw=5;
+    var n=Math.round(raw), s="";
+    for(var i=0;i<5;i++) s+= (i<n? "★":"☆");
+    var num=(Math.round(raw*10)/10).toFixed(1);
     var mv=ymd(r.moveDate||r.move||""), wr=ymd(r.date||r.writeDate||"");
     var src=String(r.source||r.from||"").trim();
     var SRC={"숨고":{c:"sg",t:"숨고 인증 후기"},"soomgo":{c:"sg",t:"숨고 인증 후기"},
@@ -1311,7 +1315,7 @@
     if(!who || /코드|시트|없음|없는|미확인/.test(who) || /^\(.*\)$/.test(who)) who="고객";
     return '<div class="rvbox">'+
       (dates?'<div class="dts">'+dates+'</div>':'')+
-      '<div class="st">'+s+'</div>'+
+      '<div class="st">'+s+'<b class="stnum">'+num+'</b></div>'+
       '<div class="tx">'+String(r.text||"").replace(/</g,"&lt;")+'</div>'+
       ((r.tags&&r.tags.length)?'<div class="rtags">'+r.tags.map(function(t){return '<span>'+t+'</span>';}).join("")+'</div>':'')+
       '<div class="wh">— '+who+(r.kind?" · "+r.kind:"")+'</div></div>';
@@ -1366,14 +1370,14 @@
 
       c.innerHTML=
         '<div class="rvtop"><span class="rvstar">'+stars+'</span><span class="rvavg">'+(avg?avg.toFixed(1):"-")+'</span></div>'+
-        '<div class="rvsub"><b>고객 '+rated+'명이 평가</b> · 글로 남겨주신 후기 '+written+'건</div>'+
+        '<div class="rvsub"><b>고객 '+rated+'명이 평가</b>'+(written<rated?' · 글로 남겨주신 후기 '+written+'건':'')+'</div>'+
         tagHtml+
         (parts.length?'<div class="rvsub2">'+parts.join(" · ")+'</div>':'')+
         '<div class="rvsub2">후기 작성일 최신순 · 고치거나 지우지 않고 받은 그대로 올립니다</div>';
     }
   }
 
-  var rvData=[], rvShown=0, rvFetched=false, rvStats=null;
+  var rvData=[], rvShown=0, rvFetchAt=0, rvStats=null;
 
   function rvSeed(){
     rvData  = rvSort(RV_SEED);
@@ -1386,8 +1390,8 @@
     var box=document.getElementById("rvList");
     if(!box) return;
     if(!rvData.length || !box.innerHTML.trim()) rvSeed();   /* ① 즉시 표시 */
-    if(rvFetched) return;
-    rvFetched = true;
+    if(Date.now()-rvFetchAt < 60000) return;               /* 1분 안에 이미 받았으면 건너뜀 */
+    rvFetchAt = Date.now();
     if(!CONFIG.ENDPOINT) return;
     /* ② 뒤에서 최신 후기를 받아 조용히 갈아 끼운다 */
     fetchTimeout(CONFIG.ENDPOINT+"?tab=review",{method:"GET"},9000)
@@ -1402,7 +1406,7 @@
         rvShown=Math.min(Math.max(keep,3), rvData.length);
         rvRender();
       })
-      .catch(function(){ rvFetched=false; });   /* 실패하면 다음에 다시 시도 */
+      .catch(function(){ rvFetchAt=0; });      /* 실패하면 다음에 다시 시도 */
   }
   var rvm=document.getElementById("rvMore");
   if(rvm)rvm.addEventListener("click",function(){ rvShown=Math.min(rvShown+3,rvData.length); rvRender(); });

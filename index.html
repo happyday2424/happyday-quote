@@ -352,7 +352,18 @@
   .agreebox .txt{font-size:15px;color:var(--text);line-height:1.55;}
   .agreebox .txt .em{color:var(--muted);font-size:15px;display:block;margin-top:4px;}
   .sendbtn{width:100%;border:none;border-radius:12px;padding:15px;font-size:15.5px;font-weight:800;background:var(--line);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;}
-  .sendbtn.on{background:var(--teal);color:#fff;cursor:pointer;}
+  .sendbtn{cursor:pointer;}
+  .sendbtn.on{background:var(--teal);color:#fff;}
+  .flashme{animation:flashme 1.7s ease-out 1;border-radius:10px;}
+  @keyframes flashme{0%,100%{box-shadow:0 0 0 0 rgba(217,119,6,0);}
+    12%,58%{box-shadow:0 0 0 4px rgba(217,119,6,.5);background:#FFF7E0;}}
+  .misswrap{background:#FEF2F2;border:1.5px solid #FCA5A5;border-radius:12px;padding:13px 14px;text-align:left;}
+  .misshd{font-size:15px;font-weight:800;color:#B91C1C;margin-bottom:4px;}
+  .misssub{font-size:13.5px;color:#B91C1C;opacity:.85;margin-bottom:9px;}
+  .missbtn{display:flex;justify-content:space-between;align-items:center;width:100%;background:#fff;
+    border:1.5px solid #FCA5A5;border-radius:9px;padding:12px 13px;font-family:inherit;font-size:15px;
+    font-weight:700;color:#B91C1C;cursor:pointer;margin-bottom:7px;text-align:left;}
+  .missbtn:last-child{margin-bottom:0;}
   .amberbox{margin-top:10px;background:var(--amberBg);border:1px solid #E8D2A6;border-radius:10px;padding:11px 13px;display:flex;gap:9px;align-items:flex-start;font-size:14.5px;color:#8A6418;line-height:1.55;}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;display:none;align-items:center;justify-content:center;padding:18px;}
   .modal.show{display:flex;}
@@ -418,7 +429,7 @@
     해피데이익스프레스 · 대표 박종률<br>
     사업자등록번호 305-30-98954 · 화물자동차 운송사업 허가(대전 동구청)<br>
     대전광역시 서구 복수동로74번길 30, 2층 202호<br>
-    <span style="color:#B6C0CC;">v30 · 0809-1240</span>
+    <span style="color:#B6C0CC;">v31 · 0809-1330</span>
   </div>
 </div>
 
@@ -947,6 +958,17 @@
     }
   }
   echoPhone();
+  /* 탭하면 커서를 맨 끝으로 (010- 앞에 끼어드는 것 방지) */
+  function phoneEnd(){ setTimeout(function(){ try{ var n=phoneEl.value.length; phoneEl.setSelectionRange(n,n); }catch(e){} },0); }
+  phoneEl.addEventListener("focus",phoneEnd);
+  phoneEl.addEventListener("click",phoneEnd);
+  /* 시를 고르면 분이 자동으로 열림 */
+  (function(){
+    var hh=document.getElementById("vHour"), mm=document.getElementById("vMin");
+    if(hh&&mm) hh.addEventListener("change",function(){
+      if(hh.value){ try{ mm.focus(); if(mm.showPicker) mm.showPicker(); }catch(e){} }
+    });
+  })();
   try{var q=new URLSearchParams(location.search);if(q.get("phone"))phoneEl.value=hyphen(q.get("phone"));}catch(e){}
 
   function gatherSub(){var v=state.gather,box=document.getElementById("gatherSub");
@@ -1095,7 +1117,14 @@
             var fi=box.querySelector('[data-k="fl"]'); if(fi)fi.value=f;
           }
         }
-        if(k==="si"){s.gu="";addrCard(side);}
+        if(k==="gu"){ var d=box.querySelector('[data-k="detail"]'); if(d){try{d.focus();}catch(e){}} }
+        if(k==="si"){
+          s.gu="";addrCard(side);updateCounter();
+          var nb=document.getElementById(isFrom?"addrFrom":"addrTo");
+          var g=nb.querySelector('[data-k="gu"]');
+          if(g){ try{ g.focus(); if(g.showPicker) g.showPicker(); }catch(e){} }
+          return;
+        }
         updateCounter();
       });
     });
@@ -1123,6 +1152,31 @@
   document.querySelectorAll("#builtin button").forEach(function(b){b.addEventListener("click",function(){var v=b.getAttribute("data-v");state.builtin=(state.builtin===v?"":v);document.querySelectorAll("#builtin button").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-v")===state.builtin);});document.getElementById("builtinNote").innerHTML=state.builtin==="있음"?'<div style="margin-top:9px;font-size:14px;color:#0F6E56;background:var(--tealBg);border-radius:8px;padding:8px 11px;line-height:1.5;">붙박이장 <b>문을 열어 안쪽이 보이게</b> 한 장 더 찍어 해당 방에 넣어주시면 정확합니다.</div>':'';});});
 
   function counts(){var p=0,v=0;state.rooms.forEach(function(r){r.files.forEach(function(f){f.isVideo?v++:p++;});});return {p:p,v:v};}
+  var MISS=[];
+  var MISSMAP={
+    "이사 예정일":"#mdateBtn",
+    "연락처(010 포함 11자리)":"#phone",
+    "거주 인원":"#addrFrom [data-ppl]",
+    "출발지 주소":"#addrFrom [data-k='detail']",
+    "사진 또는 영상":"#photoCard",
+    "출발지 층수":"#addrFrom [data-k='fl']",
+    "출발지 작업조건":"#addrFrom [data-work]",
+    "도착지 층수":"#addrTo [data-k='fl']",
+    "도착지 작업조건":"#addrTo [data-work]",
+    "개인정보 동의":"#agree"
+  };
+  function goMiss(label){
+    var sel=MISSMAP[label]; if(!sel)return;
+    var el=document.querySelector(sel); if(!el)return;
+    var wrap=el.closest?(el.closest(".addr")||el.closest(".agreebox")||el.closest(".card")||el):el;
+    try{ el.scrollIntoView({behavior:"smooth",block:"center"}); }catch(e){ try{el.scrollIntoView();}catch(e2){} }
+    var tgt=(el.tagName==="INPUT"&&el.type!=="checkbox")?el:wrap;
+    tgt.classList.add("flashme");
+    setTimeout(function(){tgt.classList.remove("flashme");},1750);
+    if(el.tagName==="INPUT"&&el.type!=="checkbox"){
+      setTimeout(function(){try{el.focus();}catch(e){}},450);
+    }
+  }
   function updateCounter(){var c=counts();document.getElementById("counter").textContent="사진 "+c.p+"장 · 영상 "+c.v+"개 첨부됨";
     var ph=(phoneEl.value||"").replace(/[^0-9]/g,"");
     var phoneOk=(ph.length===11 && ph.indexOf("010")===0);
@@ -1144,10 +1198,18 @@
     }
     if(!agreeOk) miss.push("개인정보 동의");
     var ready=(miss.length===0);
+    MISS=miss;
     var btn=document.getElementById("sendBtn");btn.classList.toggle("on",ready);
     var hintEl=document.getElementById("sendHint");
     hintEl.style.display=ready?"none":"block";
-    hintEl.textContent = miss.length ? ("아직 "+miss.join(" · ")+" 이(가) 남았어요") : "";}
+    if(ready){ hintEl.innerHTML=""; return; }
+    hintEl.innerHTML='<div class="misswrap"><div class="misshd">⚠ 아직 보낼 수 없습니다</div>'
+      +'<div class="misssub">아래 '+miss.length+'가지를 채워주세요. 눌러서 바로 이동합니다.</div>'
+      +miss.map(function(m){return '<button type="button" class="missbtn" data-m="'+m+'"><span>'+m+'</span><span>›</span></button>';}).join('')
+      +'</div>';
+    hintEl.querySelectorAll(".missbtn").forEach(function(b){
+      b.addEventListener("click",function(){ goMiss(b.getAttribute("data-m")); });
+    });}
   ["agree","agree3rd","agreeMk"].forEach(function(id){var e=document.getElementById(id);if(e)e.addEventListener("change",updateCounter);});
   function showDone(){var c=counts();var fromStr=[state.from.si,state.from.gu,state.from.detail].filter(Boolean).join(" ")||"—";var toStr=[state.to.si,state.to.gu,state.to.detail].filter(Boolean).join(" ");var tail=(phoneEl.value.replace(/[^0-9]/g,"").slice(-4))||"";document.getElementById("mMsg").innerHTML='<b>'+(phoneEl.value||"입력하신 번호")+'</b>로 접수되었습니다.<br>내용 확인 후 <b style="color:var(--teal)">영업시간 기준 2시간 안에</b> 연락드리겠습니다.';
     var mdateV=document.getElementById("mdate").value||"—";
@@ -1257,7 +1319,12 @@
 
   var sending=false;
   document.getElementById("sendBtn").addEventListener("click",function(){
-    if(!this.classList.contains("on")||sending)return;
+    if(sending)return;
+    if(!this.classList.contains("on")){
+      updateCounter();
+      if(MISS.length) goMiss(MISS[0]);
+      return;
+    }
     var btn=this;
     if(!CONFIG.ENDPOINT){
       if(confirm("전송 주소가 아직 설정되지 않았습니다.\n문자로 대신 보낼까요?\n(사진은 따로 보내주셔야 합니다)")) smsFallback();

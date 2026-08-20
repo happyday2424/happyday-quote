@@ -193,6 +193,16 @@
   .rvsub b{color:var(--navy);}
   .rvsub2{font-size:12.5px;color:#9AA6B4;margin-top:3px;line-height:1.55;}
   .rvtaghead{font-size:13px;font-weight:800;color:var(--muted);margin-top:12px;}
+  /* ★ 항목별 평균 점수 — 몇 명이 꼽았나가 아니라 실제 몇 점인가 */
+  .rvitems{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px;margin-bottom:6px;}
+  .rvitem{display:flex;align-items:center;gap:8px;background:var(--tealBg);
+    border-radius:9px;padding:9px 11px;}
+  .rvitem .nm{flex:1;min-width:0;font-size:13.5px;font-weight:800;color:#0F766E;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rvitem .sc{font-size:16px;font-weight:900;color:var(--navy);
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+  .rvitem .cnt{font-size:11.5px;color:#7A8598;font-weight:700;}
+  @media (max-width:380px){ .rvitems{grid-template-columns:1fr;} }
   .rvtags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;margin-bottom:4px;}
   .rvtags span{background:var(--tealBg);color:#0F766E;border-radius:8px;padding:7px 11px;
     font-size:13px;font-weight:800;}
@@ -1546,18 +1556,36 @@
       var full=Math.round(avg), stars="";
       for(var i=0;i<5;i++) stars += (i<full? "★":"☆");
 
-      /* 고객이 많이 꼽아주신 평가항목 — 별점만 주신 분 것까지 포함 */
+      /* ★ 항목별 평균 점수
+         예전에는 '시간약속 18' 처럼 몇 명이 꼽았는지만 보였다.
+         손님은 그게 잘한 건지 못한 건지 알 수 없다.
+         이제 실제 평균을 그대로 보여준다. 4.3 이면 4.3 으로 나간다. */
       var tagHtml="";
-      var tg=(rvStats&&rvStats.tags&&rvStats.tags.length)?rvStats.tags:null;
-      if(!tg){
-        var tc={};
-        rvData.forEach(function(r){ (r.tags||[]).forEach(function(t){ t=String(t).trim(); if(t) tc[t]=(tc[t]||0)+1; }); });
-        tg=Object.keys(tc).map(function(t){return {t:t,n:tc[t]};}).sort(function(a,b){return b.n-a.n;}).slice(0,6);
-      }
-      if(tg&&tg.length){
-        tagHtml='<div class="rvtaghead">고객이 많이 꼽아주신 점</div><div class="rvtags">'
-          +tg.slice(0,6).map(function(x){ return '<span>'+String(x.t).replace(/</g,"&lt;")+' <b>'+x.n+'</b></span>'; }).join("")
+      var it=(rvStats&&rvStats.items&&rvStats.items.length)?rvStats.items:null;
+
+      if(it){
+        tagHtml='<div class="rvtaghead">항목별 점수</div><div class="rvitems">'
+          +it.map(function(x){
+              return '<div class="rvitem">'
+                +'<span class="nm">'+String(x.t).replace(/</g,"&lt;")+'</span>'
+                +'<span class="sc">'+Number(x.v).toFixed(1)+'</span>'
+                +'<span class="cnt">'+x.n+'명</span>'
+                +'</div>';
+            }).join("")
           +'</div>';
+      } else {
+        /* 항목별 점수가 아직 없으면 예전처럼 많이 꼽아주신 점을 보여준다 */
+        var tg=(rvStats&&rvStats.tags&&rvStats.tags.length)?rvStats.tags:null;
+        if(!tg){
+          var tc={};
+          rvData.forEach(function(r){ (r.tags||[]).forEach(function(t){ t=String(t).trim(); if(t) tc[t]=(tc[t]||0)+1; }); });
+          tg=Object.keys(tc).map(function(t){return {t:t,n:tc[t]};}).sort(function(a,b){return b.n-a.n;}).slice(0,6);
+        }
+        if(tg&&tg.length){
+          tagHtml='<div class="rvtaghead">고객이 많이 꼽아주신 점</div><div class="rvtags">'
+            +tg.slice(0,6).map(function(x){ return '<span>'+String(x.t).replace(/</g,"&lt;")+' <b>'+x.n+'</b></span>'; }).join("")
+            +'</div>';
+        }
       }
 
       c.innerHTML=
@@ -1565,9 +1593,13 @@
         '<div class="rvsub"><b>고객 '+rated+'명이 평가</b>'+(written<rated?' · 글로 남겨주신 후기 '+written+'건':'')+'</div>'+
         tagHtml+
         (parts.length?'<div class="rvsub2">'+parts.join(" · ")+'</div>':'')+
-        '<div class="rvsub2">후기 작성일 최신순 · 고치거나 지우지 않고 받은 그대로 올립니다</div>';
+        '<div class="rvsub2">후기 작성일 최신순 · 고치거나 지우지 않고 받은 그대로 올립니다</div>'+
+        '<div class="rvsub2" style="opacity:.45;font-size:11px">'+QUOTE_VER+'</div>';
     }
   }
+
+  /* 판 번호 — 화면을 고칠 때마다 올린다. 후기 안내문 아래에 작게 표시된다 */
+  var QUOTE_VER = 'v32 · 0820-1325';
 
   var rvData=[], rvShown=0, rvFetchAt=0, rvStats=null;
 

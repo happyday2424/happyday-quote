@@ -439,7 +439,7 @@
     해피데이익스프레스 · 대표 박종률<br>
     사업자등록번호 305-30-98954 · 화물자동차 운송사업 허가(대전 동구청)<br>
     대전광역시 서구 복수동로74번길 30, 2층 202호<br>
-    <span style="color:#B6C0CC;">v31 · 0809-1330</span>
+    <span style="color:#B6C0CC;" id="verFoot"></span>
   </div>
 </div>
 
@@ -869,6 +869,24 @@
 <div class="modal" id="modal"><div class="mbox"><div class="mchk">✅</div><div style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:10px;">보내주셔서 감사합니다</div><div style="font-size:17px;line-height:1.65;margin-bottom:16px;" id="mMsg"></div><div style="background:var(--bg);border-radius:10px;padding:14px 15px;font-size:16px;color:var(--text);line-height:1.75;text-align:left;margin-bottom:16px;" id="mSum"></div><a href="tel:01064072424" style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;box-sizing:border-box;background:#fff;color:var(--navy);border:2px solid var(--navy);border-radius:10px;padding:15px;font-size:17px;font-weight:800;text-decoration:none;margin-bottom:9px;">📞 급하시면 바로 전화하기</a><a id="mCal" href="#" style="display:none;width:100%;box-sizing:border-box;justify-content:center;background:var(--teal);color:#fff;border:none;border-radius:10px;padding:15px;font-size:17px;font-weight:800;text-decoration:none;text-align:center;margin-bottom:9px;">📅 방문일정 캘린더에 추가</a><div style="background:linear-gradient(135deg,#FFF8E8,#FDF0D2);border:1.5px solid #EBD9A8;border-radius:11px;padding:14px 14px;margin-bottom:10px;text-align:center;"><div style="font-size:15.5px;font-weight:800;color:#8A6A12;line-height:1.45;">이사 앞둔 분 계시면<br>이 링크 보내주세요</div><div style="font-size:13.5px;color:#7A6640;margin-top:5px;">받으신 분도 청소가 공짜입니다</div><button type="button" id="mRefCopy" style="width:100%;margin-top:10px;background:var(--amber);color:#fff;border:none;border-radius:10px;padding:13px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;">🔗 링크 복사하기</button><div id="mRefOk" style="display:none;font-size:13.5px;color:#0F766E;font-weight:800;margin-top:8px;">복사됐어요 👍</div></div><button class="addbtn" style="width:100%;justify-content:center;background:var(--navy);color:#fff;border:none;font-size:17px;padding:15px;" id="mClose">닫기</button></div></div>
 
 <script>
+/* ══════════════════════════════════════════════
+   판 번호 — 여기 한 곳만 고친다.
+   홈 하단과 후기 화면 두 곳에 같은 값이 찍힌다.
+   파일명도 같은 값으로 맞춘다 (규칙 4장)
+   ══════════════════════════════════════════════ */
+var APP_VER = 'v34 · 0823-2235';
+var QUOTE_VER = APP_VER;
+(function(){
+  /* 이 script 는 홈 하단보다 뒤에 있으므로 바로 찍힌다.
+     혹시 순서가 바뀌어도 되게 DOMContentLoaded 도 함께 건다 */
+  var put = function(){
+    var f = document.getElementById('verFoot');
+    if (f) f.textContent = APP_VER;
+  };
+  put();
+  document.addEventListener('DOMContentLoaded', put);
+})();
+
   /* ═══════════════════════════════════════════════
      설정 — 여기만 채우면 전송이 켜집니다
      ENDPOINT : 구글 Apps Script 웹앱 URL (텍스트+사진 수신)
@@ -1598,9 +1616,6 @@
         '<div class="rvsub2" style="opacity:.45;font-size:11px">'+QUOTE_VER+'</div>';
     }
   }
-
-  /* 판 번호 — 화면을 고칠 때마다 올린다. 후기 안내문 아래에 작게 표시된다 */
-  var QUOTE_VER = 'v33 · 0823-2220';
 
   var rvData=[], rvShown=0, rvFetchAt=0, rvStats=null;
 

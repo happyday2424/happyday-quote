@@ -1025,7 +1025,7 @@
    홈 하단과 후기 화면 두 곳에 같은 값이 찍힌다.
    파일명도 같은 값으로 맞춘다 (규칙 4장)
    ══════════════════════════════════════════════ */
-var APP_VER = 'v54 · 0827-2250';
+var APP_VER = 'v55 · 0831-1510';
 var QUOTE_VER = APP_VER;
 (function(){
   /* 이 script 는 홈 하단보다 뒤에 있으므로 바로 찍힌다.
@@ -1600,12 +1600,27 @@ var QUOTE_VER = APP_VER;
       return k;
     }catch(e){ return Math.random().toString(36).slice(2,10); }
   })();
+  /* ★v55 어디서 온 손님인지 — 주소 뒤 ?f=숨고 를 읽는다
+     숨고·블로그·인스타는 대표가 손으로 붙이므로 표시를 넣을 수 있다.
+     표시가 없으면 문자씨(콜백)로 본다. 없는 것을 추정하지 않는다.
+     한 번 읽으면 그 방문 내내 같은 값을 쓴다 — 페이지를 옮겨도 유지 */
+  var LOG_FROM = (function(){
+    var v = "";
+    try{
+      var m = location.search.match(/[?&]f=([^&#]+)/);
+      if(m) v = decodeURIComponent(m[1]).slice(0,12);
+      if(v) sessionStorage.setItem("hd_from", v);
+      else  v = sessionStorage.getItem("hd_from") || "";
+    }catch(e){}
+    return v || "문자씨";
+  })();
+
   var LOG_SENT = {};
   function logHit(where, once){
     if(!CONFIG.ENDPOINT) return;
     if(once){ if(LOG_SENT[where]) return; LOG_SENT[where] = 1; }
     var body = JSON.stringify({
-      kind:"log", vid:LOG_ID, where:where, ver:APP_VER,
+      kind:"log", vid:LOG_ID, where:where, ver:APP_VER, from:LOG_FROM,
       w:(window.screen&&window.screen.width)||0
     });
     try{
